@@ -43,7 +43,7 @@ public class AstPrinter implements Expr.Visitor<String> {
             new Expr.Unary(
                 new Token(TokenType.MINUS, "-", null, 1),
                 new Expr.Literal(123)),
-            new Token(TokenType.STAR_STAR, "**", null, 1),
+            new Token(TokenType.CARET, "^", null, 1),
             new Expr.Grouping(new Expr.Literal(45.67))
         );
 

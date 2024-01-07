@@ -67,9 +67,8 @@ public class Scanner {
             case '#':
                 while (peek() != '\n' && !isAtEnd()) advance();
                 break;
-            case '*':
-                addToken(match('*') ? TokenType.STAR_STAR : TokenType.STAR);
-                break;
+            case '*': addToken(TokenType.STAR); break;
+            case '^': addToken(TokenType.CARET); break;
             case '!':
                 addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
                 break;
