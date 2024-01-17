@@ -1,9 +1,13 @@
-public class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
 
-    void interpret(Expr expression) {
+public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+    private Environment environment = new Environment();
+
+    void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (RuntimeError e) {
             Lox.runtimeError(e);
         }
@@ -41,20 +45,76 @@ public class Interpreter implements Expr.Visitor<Object> {
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or Strings.");
 
             case GREATER:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left > (double)right;
+                // checkNumberOperands(expr.operator, left, right);
+                if (left instanceof Double && right instanceof Double) {
+                    return (double)left > (double)right;
+                }
+
+                if (left instanceof String && right instanceof String) {
+                    return left.toString().length() > right.toString().length();
+                }
+
+                if (left instanceof Double && right instanceof String) {
+                    return (double)left > right.toString().length();
+                }
+
+                if (left instanceof String && right instanceof Double) {
+                    return left.toString().length() > (double)right;
+                }
 
             case GREATER_EQUAL:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left >= (double)right;
+                // checkNumberOperands(expr.operator, left, right);
+                if (left instanceof Double && right instanceof Double) {
+                    return (double)left >= (double)right;
+                }
+
+                if (left instanceof String && right instanceof String) {
+                    return left.toString().length() >= right.toString().length();
+                }
+
+                if (left instanceof Double && right instanceof String) {
+                    return (double)left >= right.toString().length();
+                }
+
+                if (left instanceof String && right instanceof Double) {
+                    return left.toString().length() >= (double)right;
+                }
 
             case LESS:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left < (double)right;
+                // checkNumberOperands(expr.operator, left, right);
+                if (left instanceof Double && right instanceof Double) {
+                    return (double)left < (double)right;
+                }
+
+                if (left instanceof String && right instanceof String) {
+                    return left.toString().length() < right.toString().length();
+                }
+
+                if (left instanceof Double && right instanceof String) {
+                    return (double)left < right.toString().length();
+                }
+
+                if (left instanceof String && right instanceof Double) {
+                    return left.toString().length() < (double)right;
+                }
 
             case LESS_EQUAL:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left <= (double)right;
+                // checkNumberOperands(expr.operator, left, right);
+                if (left instanceof Double && right instanceof Double) {
+                    return (double)left <= (double)right;
+                }
+
+                if (left instanceof String && right instanceof String) {
+                    return left.toString().length() <= right.toString().length();
+                }
+
+                if (left instanceof Double && right instanceof String) {
+                    return (double)left <= right.toString().length();
+                }
+
+                if (left instanceof String && right instanceof Double) {
+                    return left.toString().length() <= (double)right;
+                }
 
             case BANG_EQUAL: return !isEqual(left, right);
 
@@ -69,6 +129,9 @@ public class Interpreter implements Expr.Visitor<Object> {
                 return (double)(Math.pow((double)left, Math.floor((double)right)));
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
+                if ((double)right == 0.0D) {
+                    throw new RuntimeError(expr.operator, "ZeroDivisionError: Division By Zero");
+                }
                 return (double)left / (double)right;
 
             case STAR:
@@ -78,6 +141,9 @@ public class Interpreter implements Expr.Visitor<Object> {
                 }
 
                 if (left instanceof String && right instanceof Double) {
+                    if ((double)right % 1 != 0) {
+                        throw new RuntimeError(expr.operator, "right operand must be integer when working with strings.");
+                    }
                     String output = "";
                     for (int i = 0; i < Math.floor((double)right); i++) {
                         output += (String)left;
@@ -86,8 +152,7 @@ public class Interpreter implements Expr.Visitor<Object> {
                     return output;
                 }
 
-                throw new RuntimeError(expr.operator,
-                        "left operand should be either a string or a number, right operand should always be number");
+                throw new RuntimeError(expr.operator, "operand must be a number.");
             default:
                 System.out.println("TODO");
         }
@@ -128,6 +193,10 @@ public class Interpreter implements Expr.Visitor<Object> {
         return expr.accept(this);
     }
 
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
+    }
+
     private boolean isTruthy(Object object) {
         if (object == null) return false;
         if (object instanceof Boolean) return (boolean)object;
@@ -150,5 +219,63 @@ public class Interpreter implements Expr.Visitor<Object> {
         if (left instanceof Double && right instanceof Double) return;
 
         throw new RuntimeError(operator, "operands must be numbers.");
+    }
+
+	@Override
+	public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+	}
+
+	@Override
+	public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+
+        System.out.println(stringify(value));
+        return null;
+	}
+
+	@Override
+	public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, value);
+        return null;
+	}
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+
+        return value;
+    }
+
+	@Override
+	public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
+	}
+
+    @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+
+        return null;
+    }
+
+    void executeBlock(List<Stmt> statements, Environment env) {
+        Environment previous = this.environment;
+        try {
+            this.environment = env;
+
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
     }
 }
