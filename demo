@@ -1,28 +1,59 @@
-print "one";
-print true;
-
-let a = 'global a';
-let b = 'global b';
-let c = 'global c';
-{
-    let a = 'outer a';
-    let b = 'outer b';
-    {
-        let a = 'inner a';
-        print a;
-        print b;
-        print c;
-    }
-    print a;
-    print b;
-    print c;
-}
-print a;
-print b;
-print c;
+// print "one";
+// print true;
+//
+// let a = 'global a';
+// let b = 'global b';
+// let c = 'global c';
+// {
+//     let a = 'outer a';
+//     let b = 'outer b';
+//     {
+//         let a = 'inner a';
+//         print a;
+//         print b;
+//         print c;
+//     }
+//     print a;
+//     print b;
+//     print c;
+// }
+// print a;
+// print b;
+// print c;
 
 # Chapter 9
-let i;
-for (i = 0; i < 10; i = i + 1) {
-    print i;
+// let i;
+// for (i = 0; i < 10; i = i + 1) {
+//    print i;
+// }
+
+# Chapter 10
+// fn sumAndPrint(a, b) {
+//     print a + b;
+// }
+//
+// sumAndPrint(5, 10);
+//
+// print sumAndPrint;
+
+# fn factorial(n) {
+#     if (n <= 1) return 1;
+#
+#     return n * factorial(n - 1);
+# }
+#
+# print factorial(5);
+
+fn makeCounter() {
+    let i = 0;
+    fn count() {
+        i = i + 1;
+        print i;
+    }
+
+    return count;
 }
+
+let counter = makeCounter();
+counter();
+counter();
