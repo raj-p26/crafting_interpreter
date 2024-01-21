@@ -44,16 +44,25 @@
 #
 # print factorial(5);
 
-fn makeCounter() {
-    let i = 0;
-    fn count() {
-        i = i + 1;
-        print i;
-    }
+# fn makeCounter() {
+#     let i = 0;
+#     fn count() {
+#         i = i + 1;
+#         print i;
+#     }
+#
+#     return count;
+# }
+#
+# let counter = makeCounter();
+# counter();
+# counter();
 
-    return count;
+# Chapter 12
+class Bacon {
+    eat() {
+        print "Eating Bacon";
+    }
 }
 
-let counter = makeCounter();
-counter();
-counter();
+Bacon.eat();
