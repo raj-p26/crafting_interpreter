@@ -1,5 +1,6 @@
 #include "chunk.h"
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "value.h"
 #include "vm.h"
@@ -75,9 +76,8 @@ static InterpreterResult run() {
 #undef BINARY_OP
 }
 
-InterpreterResult interpret(Chunk *chunk) {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
+InterpreterResult interpret(const char* source) {
+    compile(source);
 
-    return run();
+    return INTERPRET_OK;
 }
