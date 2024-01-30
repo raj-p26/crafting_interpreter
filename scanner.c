@@ -139,7 +139,7 @@ static TokenType identifierType() {
             if (scanner.current - scanner.start > 1) {
                 switch (scanner.start[1]) {
                     case 'e': return checkKeyword(2, 2, "lf", TOKEN_SELF);
-                    case 'u': return checkKeyword(2, 2, "uper", TOKEN_SUPER);
+                    case 'u': return checkKeyword(2, 3, "per", TOKEN_SUPER);
                 }
             }
         case 't': return checkKeyword(1, 3, "rue", TOKEN_TRUE);
@@ -193,21 +193,22 @@ Token scanToken() {
     if (isDigit(c)) return number();
 
     switch (c) {
-        case '(': makeToken(TOKEN_LEFT_PAREN); break;
-        case ')': makeToken(TOKEN_RIGHT_PAREN); break;
-        case '{': makeToken(TOKEN_LEFT_BRACE); break;
-        case '}': makeToken(TOKEN_RIGHT_BRACE); break;
-        case ',': makeToken(TOKEN_COMMA); break;
-        case '.': makeToken(TOKEN_DOT); break;
-        case '-': makeToken(TOKEN_MINUS); break;
-        case '+': makeToken(TOKEN_PLUS); break;
-        case '^': makeToken(TOKEN_CARET); break;
-        case '/': makeToken(TOKEN_SLASH); break;
-        case '*': makeToken(TOKEN_STAR); break;
-        case '!': makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
-        case '=': makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
-        case '<': makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
-        case '>': makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+        case '(': return makeToken(TOKEN_LEFT_PAREN);
+        case ')': return makeToken(TOKEN_RIGHT_PAREN);
+        case '{': return makeToken(TOKEN_LEFT_BRACE);
+        case '}': return makeToken(TOKEN_RIGHT_BRACE);
+        case '^': return makeToken(TOKEN_CARET);
+        case ';': return makeToken(TOKEN_SEMICOLON);
+        case ',': return makeToken(TOKEN_COMMA);
+        case '.': return makeToken(TOKEN_DOT);
+        case '-': return makeToken(TOKEN_MINUS);
+        case '+': return makeToken(TOKEN_PLUS);
+        case '/': return makeToken(TOKEN_SLASH);
+        case '*': return makeToken(TOKEN_STAR);
+        case '!': return makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+        case '=': return makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+        case '<': return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+        case '>': return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
         case '"': return string('"');
         case '\'': return string('\'');
     }

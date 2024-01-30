@@ -1,10 +1,11 @@
+#include <stdio.h>
+
 #include "chunk.h"
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
 #include "value.h"
 #include "vm.h"
-#include <stdio.h>
 
 VM vm;
 
@@ -62,6 +63,13 @@ static InterpreterResult run() {
             case OP_SUBTRACT: BINARY_OP(-); break;
             case OP_MULTIPLY: BINARY_OP(*); break;
             case OP_DIVIDE:   BINARY_OP(/); break;
+            case OP_CARET: {
+                double b = pop();
+                double a = pop();
+                double result = pow(a, b);
+                push(result);
+                break;
+            }
             case OP_NEGATE: push(-pop()); break;
             case OP_RETURN: {
                 printValue(pop());
@@ -77,7 +85,19 @@ static InterpreterResult run() {
 }
 
 InterpreterResult interpret(const char* source) {
-    compile(source);
+    Chunk chunk;
+    initChunk(&chunk);
 
-    return INTERPRET_OK;
+    if (!compile(source, &chunk)) {
+        freeChunk(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
+
+    InterpreterResult result = run();
+
+    freeChunk(&chunk);
+    return result;
 }
